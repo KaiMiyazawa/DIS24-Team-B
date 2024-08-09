@@ -109,8 +109,99 @@ def signin():
         ):
             return redirect(url_for("login_error"))
 
-        return redirect(url_for("listup"))
+        return redirect(url_for("before_delete"))
     return render_template("Xlogin.html", form=form)
+
+@app.route("/before_delete/")
+def before_delete():
+    db_before = sqlite3.connect("data/tweets.db")
+    cursor = db_before.cursor()
+    cursor.execute("SELECT text FROM tweets")
+    tweets = cursor.fetchall()
+    db_before.close()
+
+    db = sqlite3.connect("data/tweets.db")
+    cursor = db.cursor()
+    score_list = []
+    for tweet in tweets:
+        print(tweet)
+        cursor.execute(
+            "UPDATE tweets SET should_delete = 0 WHERE id = ?", (tweet[0],)
+        )
+    db.commit()
+    db.close()
+    for tweet in tweets:
+        res = ""
+        while res not in ["1", "2", "3", "4", "5"]:
+            msg = [
+                {
+                    "role": "user",
+                    "content": "This is about tweets \n\""
+                    + tweet[0]
+                    + '\"\n\n これらのツイートの文章はどれくらい適切/ポジティブですか?\n Just awnser "1" to "5". You must not provide any other information. here, "1" means that the tweet is very inappropriate/negative, "2" means that the tweet is inappropriate/negative, "3" means that the tweet is neutral, "4" means that the tweet is appropriate/positive, "5" means that the tweet is very appropriate/positive. You must not provide any other information.',
+                }
+            ]
+            response = client.chat.completions.create(model="gpt-4o-mini", messages=msg)
+            res = response.choices[0].message.content
+            print("tweet", tweet)
+            print("res", res)
+        print(response.choices[0].message.content)
+
+        score_list.append(response.choices[0].message.content)
+
+    score_list = [int(score) for score in score_list]
+    total_score = sum(score_list) / len(score_list)
+    total_score = total_score * 200
+    #　切り捨て
+    total_score = int(total_score)
+    total_score = total_score / 10
+    #total_score = round(total_score, 2)
+    print("=== Total score ===")
+    print(total_score)
+    return render_template("before_delete.html", total_score=total_score)
+
+@app.route("/after_delete/")
+def after_delete():
+    db_after = sqlite3.connect("data/tweets.db")
+    cursor = db_after.cursor()
+    cursor.execute("SELECT text, should_delete FROM tweets")
+    tweets = cursor.fetchall()
+    db_after.close()
+
+    score_list = []
+    for tweet in tweets:
+        print(tweet)
+    for tweet in tweets:
+        if tweet[1] == 0:
+            res = ""
+            while res not in ["1", "2", "3", "4", "5"]:
+                msg = [
+                    {
+                        "role": "user",
+                        "content": "This is about tweets \n\""
+                        + tweet[0]
+                        + '\"\n\n これらのツイートの文章はどれくらい適切/ポジティブですか?\n Just awnser "1" to "5". You must not provide any other information. here, "1" means that the tweet is very inappropriate/negative, "2" means that the tweet is inappropriate/negative, "3" means that the tweet is neutral, "4" means that the tweet is appropriate/positive, "5" means that the tweet is very appropriate/positive. You must not provide any other information.',
+                    }
+                ]
+                response = client.chat.completions.create(model="gpt-4o-mini", messages=msg)
+                res = response.choices[0].message.content
+                print("tweet", tweet)
+                print("res", res)
+            print(response.choices[0].message.content)
+
+            score_list.append(response.choices[0].message.content)
+
+    score_list = [int(score) for score in score_list]
+    total_score = sum(score_list) / len(score_list)
+    total_score = total_score * 200
+    #　切り捨て
+    total_score = int(total_score)
+    total_score = total_score / 10
+    #total_score = round(total_score, 2)
+    print("=== Total score ===")
+    print(total_score)
+    return render_template("after_delete.html", total_score=total_score)
+
 
 
 @app.route("/listup/")
@@ -168,30 +259,6 @@ def listup():
     return render_template("listup.html", inappropriate_list=inappropriate_list)
 
 
-# listup.html
-# <body>
-#    <h1>Twitterリストアップ</h1>
-#    <form action="/cleanup" method="post">
-#        {% if inappropriate_list %}
-#            {% for tweet in inappropriate_list %}
-#            <div class="tweet">
-#                <div class="header">
-#                    <input type="checkbox" name="delete" value="{{ tweet[0] }}">
-#                    <span>{{ tweet[1] }}</span>
-#                </div>
-#                <div class="footer">
-#                    <span>{{ tweet[2] }}</span>
-#                </div>
-#            </div>
-#            {% endfor %}
-#        {% else %}
-#            <p>不適切なツイートは見つかりませんでした。</p>
-#        {% endif %}
-#        <button type="submit">削除</button>
-#    </form>
-# </body>
-
-
 @app.route("/company/", methods=["GET", "POST"])
 def company_info():
     form = LoginForm()
@@ -200,21 +267,50 @@ def company_info():
     return render_template("company.html", form=form)
 
 
+
+
 @app.route("/cleanup/", methods=["POST"])
 def cleanup():
     # ツイートを削除する関数
     def delete_tweet(tweet_id):
         print("delete tweet: " + tweet_id)
 
+    db = sqlite3.connect("data/tweets.db")
+    cursor = db.cursor()
     # ツイートを削除
+    tweets = cursor.execute("SELECT * FROM tweets").fetchall()
+
+    for tweet in tweets:
+        print(tweet)
+        cursor.execute(
+            "UPDATE tweets SET should_delete = 0 WHERE id = ?", (tweet[0],)
+        )
+    db.commit()
+    tweets = cursor.execute("SELECT * FROM tweets").fetchall()
+    print("=== before delete ===")
+    print(tweets)
+    db.close()
+
+    db = sqlite3.connect("data/tweets.db")
+    cursor = db.cursor()
     for tweet_id in request.form.getlist("delete"):
         delete_tweet(tweet_id)
+        # データベースの中身を変更
+        # sould_delete カラムについて、inappropriate_listに含まれるツイートのidに対して、1をセットする
+        cursor.execute(
+            "UPDATE tweets SET should_delete = 1 WHERE id = ?", (tweet_id,)
+            )
+    db.commit()
+    tweets = cursor.execute("SELECT * FROM tweets").fetchall()
+    print("=== after delete ===")
+    print(tweets)
+    db.close()
 
     # 3秒後にリストアップページにリダイレクト
     # ３秒まつ?
     # time.sleep(3)
 
-    return redirect(url_for("mypage"))
+    return redirect(url_for("after_delete"))
 
 
 @app.route("/success/")
