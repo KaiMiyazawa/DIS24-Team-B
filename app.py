@@ -227,6 +227,22 @@ def login_error():
     return "ログイン失敗"
 
 
+@app.route('/mypage/')
+#<!-- 企業からきたスカウトの管理画面 -->
+#<!-- data/scouts.dbに企業から来たスカウトの情報がある -->
+#<!-- scouts.dbのカラム id, name, industry, details, photo -->
+def mypage():
+    scout_db = sqlite3.connect('data/scouts.db')
+    cursor = scout_db.cursor()
+    cursor.execute('SELECT * FROM scouts')
+    scouts_list = cursor.fetchall()
+    scout_db.close()
+
+    print("=== Scouts list ===")
+    print(scouts_list)
+    return render_template('mypage.html', user='user', scouts_list=scouts_list)
+
+
 @app.route("/mypage/")
 def mypage():
     return render_template("mypage.html", user="user")
