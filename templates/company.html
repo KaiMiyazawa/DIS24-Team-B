@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企業様ログイン</title>
+    <style>
+        .hidden {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>SHOWMEにログインしてマッチする学生を探しましょう</h1>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div>
+            {{ form.username.label }}
+            {{ form.username() }}
+        </div>
+        <div id="password-field">
+            {{ form.password.label }}
+            {{ form.password() }}
+        </div>
+        {{ form.submit() }}
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var accountTypeRadios = document.querySelectorAll('input[name="account_type"]');
+            var passwordField = document.getElementById('password-field');
+            // 初期状態の設定
+            togglePasswordField();
+        });
+    </script>
+</body>
+</html>

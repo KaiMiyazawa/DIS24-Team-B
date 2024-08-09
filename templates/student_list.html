@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生一覧</title>
+    <style>
+        .student {
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+        .header {
+            font-weight: bold;
+        }
+        .footer {
+            font-size: 0.8em;
+            color: #666;
+        }
+        .details {
+            margin-top: 5px;
+        }
+        .details span {
+            display: block;
+        }
+        .scout-button {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>登録学生一覧</h1>
+    <form action="/cleanup" method="POST">
+        {% for student in student_data %}
+        <div class="student">
+            <div class="header">
+                <span>{{ student['name'] }}</span>
+            </div>
+            <div class="details">
+                <span>大学: {{ student['university'] }}</span>
+                <span>学年: {{ student['grade'] }}年</span>
+                <span>志望業界: {{ student['industry'] }}</span>
+                <span>Twitter: <a href="https://twitter.com/{{ student['twitter_account'] }}" target="_blank">{{ student['twitter_account'] }}</a></span>
+                {% if student['summary'] %}
+                <span>要約: {{ student['summary'] }}</span>
+                {% endif %}
+            </div>
+            <button class="scout-button" type="button" onclick="sendScout(this, '{{ student['name'] }}')">スカウトを送る</button>
+        </div>
+        {% endfor %}
+    </form>
+
+    <script>
+        function sendScout(button, studentName) {
+            // スカウトを送る処理を実装する
+            console.log('Sending scout to ' + studentName);
+            
+            // ボタンのテキストを変更し、ボタンを無効化する
+            button.innerText = 'スカウト済';
+            button.disabled = true;
+        }
+    </script>
+</body>
+</html>
