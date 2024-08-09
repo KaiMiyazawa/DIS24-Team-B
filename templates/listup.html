@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twitterリストアップ</title>
+    <style>
+        .tweet {
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+        .header {
+            font-weight: bold;
+        }
+        .footer {
+            font-size: 0.8em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>Twitterリストアップ</h1>
+    <form action="/cleanup" method="POST">
+        {% if inappropriate_list %}
+            {% for tweet in inappropriate_list %}
+            <div class="tweet">
+                <div class="header">
+                    <input type="checkbox" name="delete" value="{{ tweet[0] }}">
+                    <span>{{ tweet[1] }}</span>
+                </div>
+                <div class="footer">
+                    <span>{{ tweet[2] }}</span>
+                </div>
+            </div>
+            {% endfor %}
+            <button type="submit">削除</button>
+        {% else %}
+            <p>不適切なツイートは見つかりませんでした。</p>
+        {% endif %}
+    </form>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var deleteButton = document.querySelector('button[type="submit"]');
+            deleteButton.addEventListener('click', function() {
+                var result = window.confirm('選択されたツイートを削除しますか？');
+            });
+            //　トグルダウンで「正常に削除されました」というメッセージを出して、「OK」ボタンが押されたら、/cleanupに行くようにしたい。
+            var result = window.confirm('正常に削除されました');
+            confirm('OK');
+            if (result) {
+                window.location.href = '/cleanup';
+            }
+        });
+
+
+    </script>
+</body>
+<!-- 削除ボタンが押されたら、トグルダウンで「正常に削除されました」というメッセージを出して、「OK」ボタンが押されたら、/cleanupに行くようにしたい。 -->
+<!-- そのためには、JavaScriptを使って、ボタンが押されたら、メッセージを表示するようにする。 -->
+<!-- まず、メッセージを表示するためのHTMLを追加する。 -->
+<!-- その後、JavaScriptを使って、ボタンが押されたら、メッセージを表示するようにする。 -->
+</html>

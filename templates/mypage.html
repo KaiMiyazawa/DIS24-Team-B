@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHOWME - mypage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+        }
+        header {
+            background-color: #4a90e2;
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            color: #333;
+        }
+        .buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        .button {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .button-primary {
+            background-color: #4a90e2;
+            color: white;
+        }
+        .button-secondary {
+            background-color: #white;
+            color: #4a90e2;
+            border: 2px solid #4a90e2;
+        }
+        .logo {
+            background-color: #f0f0f0;
+            color: #333;
+            border: 1px solid #333;
+        }
+        .button:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h2>SHOWME</h2>
+        <!--<a href="/company/" class="button button-company">企業様 log in</a>-->
+		<!-- ユーザーのiconを表示 -->
+		<img src="{{ user.icon }}" alt="icon" width="50" height="50">
+    </header>
+    <main>
+        <!--<h1>SNSを逆にアピール</h1>
+        <div class="buttons">
+            <a href="/login" class="button button-primary">log in</a>
+            <a href="/signin" class="button button-secondary">sign up</a>
+        </div>-->
+    </main>
+	<!--<script>
+		// ユーザーのiconを表示
+		document.addEventListener('DOMContentLoaded', function() {
+			var userIcon = document.querySelector('img');
+			userIcon.src = '{{ user.icon }}';
+		});
+	</script>-->
+</body>
+</html>

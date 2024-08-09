@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ログイン</title>
+    <style>
+        .hidden {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>Twitterアカウントを登録しよう</h1>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div>
+            {{ form.account_type.label }}
+            {% for subfield in form.account_type %}
+                <div>
+                    {{ subfield }}
+                    {{ subfield.label }}
+                </div>
+            {% endfor %}
+        </div>
+        <div>
+            {{ form.username.label }}
+            {{ form.username() }}
+        </div>
+        <div id="password-field">
+            {{ form.password.label }}
+            {{ form.password() }}
+        </div>
+        {{ form.submit() }}
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var accountTypeRadios = document.querySelectorAll('input[name="account_type"]');
+            var passwordField = document.getElementById('password-field');
+
+            function togglePasswordField() {
+                if (document.querySelector('input[name="account_type"]:checked').value === 'public') {
+                    passwordField.classList.add('hidden');
+                } else {
+                    passwordField.classList.remove('hidden');
+                }
+            }
+
+            accountTypeRadios.forEach(function(radio) {
+                radio.addEventListener('change', togglePasswordField);
+            });
+
+            // 初期状態の設定
+            togglePasswordField();
+        });
+    </script>
+</body>
+</html>
