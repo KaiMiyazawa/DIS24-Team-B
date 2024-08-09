@@ -14,3 +14,14 @@ REAZON HOLDINGSさん主催
 ->SNSを見せるだけで、企業にスカウトをもらえる就活サイト
 
 (適当なあらまし)
+
+## Usage
+```
+git clone ???
+cd ???
+```
+```
+export OPENAI_API_KEY=???
+pip install -r requirements.txt
+python app.py
+```
