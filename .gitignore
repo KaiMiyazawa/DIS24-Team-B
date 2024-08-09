@@ -1,1 +1,10 @@
-.venv
+
+instance/
+migrations/
+backend/shiotani
+backend/__pycache__
+backend/app/__pycache__
+backend/app/routes/__pycache__
+backend/tests/__pycache__/
+
+.venv/
