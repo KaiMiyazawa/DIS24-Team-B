@@ -1,0 +1,56 @@
+from flask import Blueprint, request, jsonify
+from app import db
+from app.models import Scout
+from datetime import datetime
+import uuid
+
+scout_bp = Blueprint("scout", __name__)
+
+
+@scout_bp.route("/get_scouts", methods=["POST"])
+def get_scouts():
+    data = request.get_json()
+    scouts = Scout.query.filter_by(student_id=data["student_id"], rejected=False).all()
+    return jsonify(
+        [
+            {
+                "id": s.id,
+                "company_id": s.company_id,
+                "date": s.date,
+                "accepted": s.accepted,
+            }
+            for s in scouts
+        ]
+    )
+
+
+@scout_bp.route("/accept_reject_scout", methods=["POST"])
+def accept_reject_scout():
+    data = request.get_json()
+    scout = Scout.query.get(data["id"])
+
+    if scout:
+        scout.accepted = data["accepted"]
+        scout.rejected = data["rejected"]
+        db.session.commit()
+        return jsonify({"message": "Scout updated"})
+    return jsonify({"message": "Scout not found"}), 404
+
+
+@scout_bp.route("/send_scout", methods=["POST"])
+def send_scout():
+    data = request.get_json()
+    date = datetime.strptime(data["date"], "%Y-%m-%d").date()
+    # uuidでidを生成
+    id = str(uuid.uuid4())
+    scout = Scout(
+        id=id,
+        company_id=data["company_id"],
+        student_id=data["student_id"],
+        date=date,
+        accepted="pending",
+        rejected=False,
+    )
+    db.session.add(scout)
+    db.session.commit()
+    return jsonify({"message": "Scout sent"})
