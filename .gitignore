@@ -8,3 +8,4 @@ backend/app/routes/__pycache__
 backend/tests/__pycache__/
 
 .venv/
+backend/api_key
