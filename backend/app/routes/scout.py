@@ -1,25 +1,35 @@
 from flask import Blueprint, request, jsonify
 from app import db
-from app.models import Scout
+from app.models import Scout, Company
 from datetime import datetime
 import uuid
 
 scout_bp = Blueprint("scout", __name__)
 
 
-@scout_bp.route("/get_scouts", methods=["POST"])
-def get_scouts():
+@scout_bp.route("/get_scout_list", methods=["POST"])
+def get_scout_list():
     data = request.get_json()
-    scouts = Scout.query.filter_by(student_id=data["student_id"], rejected=False).all()
+    # ScoutテーブルとCompanyテーブルを結合してクエリを作成
+    scouts = (
+        db.session.query(Scout, Company)
+        .join(Company, Scout.company_id == Company.id)
+        .filter(Scout.student_id == data["student_id"], Scout.rejected == False)
+        .all()
+    )
+
+    # JSON形式に変換して返す
     return jsonify(
         [
             {
-                "id": s.id,
-                "company_id": s.company_id,
+                "scout_id": s.id,
+                "company_id": c.id,
+                "company_name": c.name,
+                "industry": c.industory,
                 "date": s.date,
                 "accepted": s.accepted,
             }
-            for s in scouts
+            for s, c in scouts
         ]
     )
 

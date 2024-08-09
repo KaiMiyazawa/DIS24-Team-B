@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app import db
 from app.models import Profile
+from uuid import uuid4
 
 profile_bp = Blueprint("profile", __name__)
 
@@ -8,7 +9,10 @@ profile_bp = Blueprint("profile", __name__)
 @profile_bp.route("/create_profile", methods=["POST"])
 def create_profile():
     data = request.get_json()
+    id = str(uuid4())
+
     profile = Profile(
+        id=id,
         name=data["name"],
         university=data["university"],
         grade=data["grade"],

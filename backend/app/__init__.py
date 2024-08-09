@@ -18,10 +18,12 @@ def create_app(config_class=Config):
     from app.routes.tweet import tweet_bp
     from app.routes.profile import profile_bp
     from app.routes.scout import scout_bp
+    from app.routes.register import register_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(tweet_bp)
     app.register_blueprint(profile_bp)
     app.register_blueprint(scout_bp)
+    app.register_blueprint(register_bp)
 
     return app

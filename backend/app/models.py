@@ -17,6 +17,8 @@ class Scout(db.Model):
     accepted = db.Column(db.String, nullable=False)
     rejected = db.Column(db.Boolean, nullable=False)
 
+    company = db.relationship("Company", backref=db.backref("scouts", lazy=True))
+
 
 class Profile(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
@@ -38,3 +40,9 @@ class Account(db.Model):
     user_id = db.Column(db.String, primary_key=True)
     password = db.Column(db.String, nullable=False)
     student = db.Column(db.Boolean, nullable=False)
+
+    def set_password(self, password):
+        self.password = password
+
+    def check_password(self, password):
+        return self.password == password
