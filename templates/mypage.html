@@ -27,7 +27,8 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            align-items: center;
+            /* 内容は左寄せ、左に隙間が欲しい */
+            align-items: left;
             padding: 2rem;
         }
         h1 {
@@ -53,7 +54,7 @@
             color: white;
         }
         .button-secondary {
-            background-color: #white;
+            background-color: white;
             color: #4a90e2;
             border: 2px solid #4a90e2;
         }
@@ -65,6 +66,19 @@
         .button:hover {
             opacity: 0.8;
         }
+        .scout_head {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        /* photo = iconとname = 企業名 を水平に表示したい。 */
+        }
+        .scouts {
+            display: flex;
+            flex-direction: column;
+            /*画面左端からの隙間が欲しい。*/
+            padding: 0 0 0 2rem;
+            gap: 1.8rem;
+        }
     </style>
 </head>
 <body>
@@ -75,18 +89,28 @@
 		<img src="{{ user.icon }}" alt="icon" width="50" height="50">
     </header>
     <main>
-        <!--<h1>SNSを逆にアピール</h1>
-        <div class="buttons">
-            <a href="/login" class="button button-primary">log in</a>
-            <a href="/signin" class="button button-secondary">sign up</a>
-        </div>-->
+        <!-- 企業からきたスカウトの管理画面 -->
+        <!-- data/scouts.dbに企業から来たスカウトの情報がある -->
+        <!-- scouts.dbのカラム id, name, industry, details, photo -->
+        <h1>企業からのスカウト</h1>
+
+        <!-- 企業からのスカウトの一覧を表示 -->
+        <div class="scouts">
+            {% if scouts_list %}
+                {% for scout in scouts_list %}
+                    <div>
+                        <div class="scout_head">
+                            <img src="{{ scout[4] }}" alt="photo" width="50" height="50">
+                            <h2>{{ scout[1] }}</h2>
+                        </div>
+                        <p>{{ scout[2] }}</p>
+                        <p>{{ scout[3] }}</p>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>スカウトはありません。</p>
+            {% endif %}
+        </div>
     </main>
-	<!--<script>
-		// ユーザーのiconを表示
-		document.addEventListener('DOMContentLoaded', function() {
-			var userIcon = document.querySelector('img');
-			userIcon.src = '{{ user.icon }}';
-		});
-	</script>-->
 </body>
 </html>
