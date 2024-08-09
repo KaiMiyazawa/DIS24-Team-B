@@ -31,7 +31,7 @@
 <body>
     <h1>登録学生一覧</h1>
     <form action="/cleanup" method="POST">
-        {% for student in student_data %}
+        {% for student in student_data|sort(attribute='match', reverse=True) %}
         <div class="student">
             <div class="header">
                 <span>{{ student['name'] }}</span>
@@ -42,7 +42,8 @@
                 <span>志望業界: {{ student['industry'] }}</span>
                 <span>Twitter: <a href="https://twitter.com/{{ student['twitter_account'] }}" target="_blank">{{ student['twitter_account'] }}</a></span>
                 {% if student['summary'] %}
-                <span>要約: {{ student['summary'] }}</span>
+                <span>マッチ度: {{ student['match'] }}%</span>
+                <span>マッチ度の理由: {{ student['reason'] }}</span>
                 {% endif %}
             </div>
             <button class="scout-button" type="button" onclick="sendScout(this, '{{ student['name'] }}')">スカウトを送る</button>
