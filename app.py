@@ -112,6 +112,8 @@ def signin():
         return redirect(url_for("before_delete"))
     return render_template("Xlogin.html", form=form)
 
+# tweets.db memo
+# id, text, date, likes, should_delete, user_id, score,
 
 @app.route("/before_delete/")
 def before_delete():
@@ -128,7 +130,6 @@ def before_delete():
         print(tweet)
         cursor.execute("UPDATE tweets SET should_delete = 0 WHERE id = ?", (tweet[0],))
     db.commit()
-    db.close()
     for tweet in tweets:
         res = ""
         while res not in ["1", "2", "3", "4", "5"]:
@@ -145,9 +146,11 @@ def before_delete():
             print("tweet", tweet)
             print("res", res)
         print(response.choices[0].message.content)
-
         score_list.append(response.choices[0].message.content)
+        cursor.execute("UPDATE tweets SET score = ? WHERE text = ?", (int(res), tweet[0]))
 
+    db.commit()
+    db.close()
     score_list = [int(score) for score in score_list]
     total_score = sum(score_list) / len(score_list)
     total_score = total_score * 200
@@ -164,7 +167,7 @@ def before_delete():
 def after_delete():
     db_after = sqlite3.connect("data/tweets.db")
     cursor = db_after.cursor()
-    cursor.execute("SELECT text, should_delete FROM tweets")
+    cursor.execute("SELECT text, should_delete, score FROM tweets")
     tweets = cursor.fetchall()
     db_after.close()
 
@@ -173,27 +176,9 @@ def after_delete():
         print(tweet)
     for tweet in tweets:
         if tweet[1] == 0:
-            res = ""
-            while res not in ["1", "2", "3", "4", "5"]:
-                msg = [
-                    {
-                        "role": "user",
-                        "content": 'This is about tweets \n"'
-                        + tweet[0]
-                        + '"\n\n これらのツイートの文章はどれくらい適切/ポジティブですか?\n Just awnser "1" to "5". You must not provide any other information. here, "1" means that the tweet is very inappropriate/negative, "2" means that the tweet is inappropriate/negative, "3" means that the tweet is neutral, "4" means that the tweet is appropriate/positive, "5" means that the tweet is very appropriate/positive. You must not provide any other information.',
-                    }
-                ]
-                response = client.chat.completions.create(
-                    model="gpt-4o-mini", messages=msg
-                )
-                res = response.choices[0].message.content
-                print("tweet", tweet)
-                print("res", res)
-            print(response.choices[0].message.content)
+            score_list.append(tweet[2])
 
-            score_list.append(response.choices[0].message.content)
-
-    score_list = [int(score) for score in score_list]
+    #score_list = [int(score) for score in score_list]
     total_score = sum(score_list) / len(score_list)
     total_score = total_score * 200
     # 　切り捨て
