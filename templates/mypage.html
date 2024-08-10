@@ -29,7 +29,6 @@
             justify-content: center;
             /* 内容は左寄せ、左に隙間が欲しい */
             align-items: left;
-            padding: 2rem;
         }
         h1 {
             font-size: 3rem;
@@ -70,7 +69,7 @@
             display: flex;
             gap: 1rem;
             align-items: center;
-        /* photo = iconとname = 企業名 を水平に表示したい。 */
+            /* photo = iconとname = 企業名 を水平に表示したい。 */
         }
         .scouts {
             display: flex;
@@ -79,14 +78,16 @@
             padding: 0 0 0 2rem;
             gap: 1.8rem;
         }
+        .scouts > div:not(:last-child) {
+            border-bottom: 1px solid #ccc;
+        }
     </style>
 </head>
 <body>
     <header>
         <h2>SHOWME</h2>
         <!--<a href="/company/" class="button button-company">企業様 log in</a>-->
-		<!-- ユーザーのiconを表示 -->
-		<img src="{{ user.icon }}" alt="icon" width="50" height="50">
+        <!-- ユーザーのiconを表示 -->
     </header>
     <main>
         <!-- 企業からきたスカウトの管理画面 -->
