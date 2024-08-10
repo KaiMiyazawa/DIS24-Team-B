@@ -112,6 +112,7 @@ def signin():
         return redirect(url_for("before_delete"))
     return render_template("Xlogin.html", form=form)
 
+
 @app.route("/before_delete/")
 def before_delete():
     db_before = sqlite3.connect("data/tweets.db")
@@ -125,9 +126,7 @@ def before_delete():
     score_list = []
     for tweet in tweets:
         print(tweet)
-        cursor.execute(
-            "UPDATE tweets SET should_delete = 0 WHERE id = ?", (tweet[0],)
-        )
+        cursor.execute("UPDATE tweets SET should_delete = 0 WHERE id = ?", (tweet[0],))
     db.commit()
     db.close()
     for tweet in tweets:
@@ -136,9 +135,9 @@ def before_delete():
             msg = [
                 {
                     "role": "user",
-                    "content": "This is about tweets \n\""
+                    "content": 'This is about tweets \n"'
                     + tweet[0]
-                    + '\"\n\n これらのツイートの文章はどれくらい適切/ポジティブですか?\n Just awnser "1" to "5". You must not provide any other information. here, "1" means that the tweet is very inappropriate/negative, "2" means that the tweet is inappropriate/negative, "3" means that the tweet is neutral, "4" means that the tweet is appropriate/positive, "5" means that the tweet is very appropriate/positive. You must not provide any other information.',
+                    + '"\n\n これらのツイートの文章はどれくらい適切/ポジティブですか?\n Just awnser "1" to "5". You must not provide any other information. here, "1" means that the tweet is very inappropriate/negative, "2" means that the tweet is inappropriate/negative, "3" means that the tweet is neutral, "4" means that the tweet is appropriate/positive, "5" means that the tweet is very appropriate/positive. You must not provide any other information.',
                 }
             ]
             response = client.chat.completions.create(model="gpt-4o-mini", messages=msg)
@@ -152,13 +151,14 @@ def before_delete():
     score_list = [int(score) for score in score_list]
     total_score = sum(score_list) / len(score_list)
     total_score = total_score * 200
-    #　切り捨て
+    # 　切り捨て
     total_score = int(total_score)
     total_score = total_score / 10
-    #total_score = round(total_score, 2)
+    # total_score = round(total_score, 2)
     print("=== Total score ===")
     print(total_score)
     return render_template("before_delete.html", total_score=total_score)
+
 
 @app.route("/after_delete/")
 def after_delete():
@@ -178,12 +178,14 @@ def after_delete():
                 msg = [
                     {
                         "role": "user",
-                        "content": "This is about tweets \n\""
+                        "content": 'This is about tweets \n"'
                         + tweet[0]
-                        + '\"\n\n これらのツイートの文章はどれくらい適切/ポジティブですか?\n Just awnser "1" to "5". You must not provide any other information. here, "1" means that the tweet is very inappropriate/negative, "2" means that the tweet is inappropriate/negative, "3" means that the tweet is neutral, "4" means that the tweet is appropriate/positive, "5" means that the tweet is very appropriate/positive. You must not provide any other information.',
+                        + '"\n\n これらのツイートの文章はどれくらい適切/ポジティブですか?\n Just awnser "1" to "5". You must not provide any other information. here, "1" means that the tweet is very inappropriate/negative, "2" means that the tweet is inappropriate/negative, "3" means that the tweet is neutral, "4" means that the tweet is appropriate/positive, "5" means that the tweet is very appropriate/positive. You must not provide any other information.',
                     }
                 ]
-                response = client.chat.completions.create(model="gpt-4o-mini", messages=msg)
+                response = client.chat.completions.create(
+                    model="gpt-4o-mini", messages=msg
+                )
                 res = response.choices[0].message.content
                 print("tweet", tweet)
                 print("res", res)
@@ -194,14 +196,13 @@ def after_delete():
     score_list = [int(score) for score in score_list]
     total_score = sum(score_list) / len(score_list)
     total_score = total_score * 200
-    #　切り捨て
+    # 　切り捨て
     total_score = int(total_score)
     total_score = total_score / 10
-    #total_score = round(total_score, 2)
+    # total_score = round(total_score, 2)
     print("=== Total score ===")
     print(total_score)
     return render_template("after_delete.html", total_score=total_score)
-
 
 
 @app.route("/listup/")
@@ -267,8 +268,6 @@ def company_info():
     return render_template("company.html", form=form)
 
 
-
-
 @app.route("/cleanup/", methods=["POST"])
 def cleanup():
     # ツイートを削除する関数
@@ -282,9 +281,7 @@ def cleanup():
 
     for tweet in tweets:
         print(tweet)
-        cursor.execute(
-            "UPDATE tweets SET should_delete = 0 WHERE id = ?", (tweet[0],)
-        )
+        cursor.execute("UPDATE tweets SET should_delete = 0 WHERE id = ?", (tweet[0],))
     db.commit()
     tweets = cursor.execute("SELECT * FROM tweets").fetchall()
     print("=== before delete ===")
@@ -297,9 +294,7 @@ def cleanup():
         delete_tweet(tweet_id)
         # データベースの中身を変更
         # sould_delete カラムについて、inappropriate_listに含まれるツイートのidに対して、1をセットする
-        cursor.execute(
-            "UPDATE tweets SET should_delete = 1 WHERE id = ?", (tweet_id,)
-            )
+        cursor.execute("UPDATE tweets SET should_delete = 1 WHERE id = ?", (tweet_id,))
     db.commit()
     tweets = cursor.execute("SELECT * FROM tweets").fetchall()
     print("=== after delete ===")
@@ -333,6 +328,16 @@ def mypage():
     cursor.execute("SELECT * FROM scouts")
     scouts_list = cursor.fetchall()
     scout_db.close()
+
+    print(scouts_list)
+
+    # マッチ度と理由を追加
+    scouts_list = [list(scout) for scout in scouts_list]
+    for scout in scouts_list:
+        scout.append(0)
+        scout.append("")
+
+    scouts_list = sort_scouts(scouts_list)
 
     print("=== Scouts list ===")
     print(scouts_list)
@@ -394,6 +399,36 @@ def student_list():
         student["reason"] = reason
 
     return render_template("student_list.html", student_data=student_data)
+
+
+def sort_scouts(scouts_list):
+    personality = "あなたはIT業界のソフトウェアエンジニアを志している学生です。あなたは仲間と高め合える環境で切磋琢磨し、最高のものを作りたいと考えています。"
+
+    for scout in scouts_list:
+        msg = [
+            {
+                "role": "user",
+                "content": ""
+                + "\n私は以下のような特徴を持っています。/n"
+                + personality
+                + "私が次の企業に合うかどうかを判定してください。以下がその企業のカルチャーです。json形式で、match_rate(int)とreason(string)を返してください。match_rateには0から100までの整数が入ります。match_rateが高い場合はその学生が合う理由を、低い場合はその学生が合わない理由を教えてください。"
+                + scout[3]
+                + "この企業の業界は"
+                + scout[2]
+                + "です。",
+            }
+        ]
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=msg,
+            response_format={"type": "json_object"},
+        )
+        decoded_json = json.loads(response.choices[0].message.content)
+        scout[5] = decoded_json["match_rate"]
+        scout[6] = decoded_json["reason"]
+
+    scouts_list = sorted(scouts_list, key=lambda x: x[5], reverse=True)
+    return scouts_list
 
 
 def get_match_rate(summary, industory):
