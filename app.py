@@ -331,13 +331,24 @@ def mypage():
 
     print(scouts_list)
 
-    # マッチ度と理由を追加
-    scouts_list = [list(scout) for scout in scouts_list]
-    for scout in scouts_list:
-        scout.append(0)
-        scout.append("")
+    # マッチ度と理由のカラムをdbに追加 ======
+    scouts_list_copy = scouts_list.copy()
+    scouts_list_copy = [list(scout) for scout in scouts_list_copy]
+    for scout in scouts_list_copy:
+        scout[7] = 0
+        scout[8] = ""
+    scouts_list_copy = sort_scouts(scouts_list_copy)
 
-    scouts_list = sort_scouts(scouts_list)
+    scout_db = sqlite3.connect("data/scouts.db")
+    cursor = scout_db.cursor()
+    cursor.execute("DELETE FROM scouts")
+    for scout in scouts_list_copy:
+        cursor.execute(
+            "INSERT INTO scouts (id, name, date, industry, details, photo, culture, match_rate, reason) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)", scout
+        )
+    scout_db.commit()
+    scout_db.close()
+    # ========================================
 
     print("=== Scouts list ===")
     print(scouts_list)
@@ -424,8 +435,8 @@ def sort_scouts(scouts_list):
             response_format={"type": "json_object"},
         )
         decoded_json = json.loads(response.choices[0].message.content)
-        scout[5] = decoded_json["match_rate"]
-        scout[6] = decoded_json["reason"]
+        scout[7] = decoded_json["match_rate"]
+        scout[8] = decoded_json["reason"]
 
     scouts_list = sorted(scouts_list, key=lambda x: x[5], reverse=True)
     return scouts_list

@@ -100,13 +100,13 @@
                 {% for scout in scouts_list %}
                     <div>
                         <div class="scout_head">
-                            <img src="{{ scout[4] }}" alt="photo" width="50" height="50">
+                            <img src="{{ scout[5] }}" alt="photo" width="50" height="50">
                             <h2>{{ scout[1] }}</h2>
                         </div>
                         <p>{{ scout[2] }}</p>
                         <p>{{ scout[3] }}</p>
-                        <p>この企業とのマッチ度：{{ scout[5] }}%</p>
-                        <p>マッチ度の理由：{{ scout[6] }}</p>
+                        <p>この企業とのマッチ度：{{ scout[7] }}%</p>
+                        <p>マッチ度の理由：{{ scout[8] }}</p>
                     </div>
                 {% endfor %}
             {% else %}
