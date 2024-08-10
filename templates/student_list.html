@@ -46,7 +46,7 @@
                 <span>マッチ度の理由: {{ student['reason'] }}</span>
                 {% endif %}
             </div>
-            <button class="scout-button" type="button" onclick="sendScout(this, '{{ student['name'] }}')">スカウトを送る</button>
+            <button class="scout-button" type="button" onclick="sendScout(this, '{{ student['name'] }}')">スカウトする</button>
         </div>
         {% endfor %}
     </form>
@@ -55,7 +55,7 @@
         function sendScout(button, studentName) {
             // スカウトを送る処理を実装する
             console.log('Sending scout to ' + studentName);
-            
+
             // ボタンのテキストを変更し、ボタンを無効化する
             button.innerText = 'スカウト済';
             button.disabled = true;

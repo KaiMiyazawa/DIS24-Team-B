@@ -31,10 +31,14 @@
             padding: 2rem;
         }
         h1 {
-            font-size: 3rem;
+            font-size: 4rem;
             margin-bottom: 2rem;
             text-align: center;
             color: #333;
+        }
+        h2 {
+            font-size: 2rem;
+            margin: 1rem;
         }
         .buttons {
             display: flex;
@@ -65,11 +69,25 @@
         .button:hover {
             opacity: 0.8;
         }
+        .logos {
+            /* 垂直に並べる */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h6 {
+            font-size: 0.5rem;
+            margin: 0;
+            padding: 0;
+        }
     </style>
 </head>
 <body>
     <header>
-        <h2>SHOWME</h2>
+        <div class="logos">
+            <h2>SHOWME</h2>
+            <h6>就活サイト</h6>
+        </div>
         <a href="/company/" class="button button-company">企業様 log in</a>
     </header>
     <main>
