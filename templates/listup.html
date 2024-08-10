@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!--<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
@@ -34,28 +34,97 @@
                 </div>
             </div>
             {% endfor %}
-            <button type="submit">削除</button>
+            <button type="submit" class="delete-button">削除</button>
         {% else %}
-            <p>不適切なツイートは見つかりませんでした。</p>
+            <p class="no-tweets">不適切なツイートは見つかりませんでした。</p>
         {% endif %}
     </form>
-    <!--<script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var deleteButton = document.querySelector('button[type="submit"]');
-            deleteButton.addEventListener('click', function() {
-                var result = window.confirm('選択されたツイートを削除しますか？');
-            });
-            //　トグルダウンで「正常に削除されました」というメッセージを出して、「OK」ボタンが押されたら、/cleanupに行くようにしたい。
-            var result = window.confirm('正常に削除されました');
-            confirm('OK');
-            if (result) {
-                window.location.href = '/cleanup';
-            }
-        });-->
-    </script>
 </body>
-<!-- 削除ボタンが押されたら、トグルダウンで「正常に削除されました」というメッセージを出して、「OK」ボタンが押されたら、/cleanupに行くようにしたい。 -->
-<!-- そのためには、JavaScriptを使って、ボタンが押されたら、メッセージを表示するようにする。 -->
-<!-- まず、メッセージを表示するためのHTMLを追加する。 -->
-<!-- その後、JavaScriptを使って、ボタンが押されたら、メッセージを表示するようにする。 -->
+</html>-->
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twitterリストアップ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #1da1f2;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .tweet {
+            background-color: #fff;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+        }
+        .tweet-content {
+            flex-grow: 1;
+        }
+        .header {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .footer {
+            color: #657786;
+            font-size: 0.9em;
+        }
+        .no-tweets {
+            text-align: center;
+            color: #657786;
+            font-style: italic;
+        }
+        .delete-button {
+            display: block;
+            width: 200px;
+            margin: 20px auto;
+            padding: 10px;
+            background-color: #e0245e;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .checkbox {
+            margin-right: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>もしかしたら印象の悪い投稿かもしれません...</h1>
+    <form action="/cleanup" method="POST">
+        {% if inappropriate_list %}
+            {% for tweet in inappropriate_list %}
+            <div class="tweet">
+                <div class="header">
+                    <input type="checkbox" name="delete" value="{{ tweet[0] }}">
+                    <span>{{ tweet[1] }}</span>
+                </div>
+                <div class="footer">
+                    <span>{{ tweet[2] }}</span>
+                </div>
+            </div>
+            {% endfor %}
+            <button type="submit" class="delete-button">削除</button>
+        {% else %}
+            <p class="no-tweets">不適切なツイートは見つかりませんでした。</p>
+        {% endif %}
+    </form>
+</body>
 </html>

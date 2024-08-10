@@ -112,6 +112,8 @@ def signin():
         return redirect(url_for("before_delete"))
     return render_template("Xlogin.html", form=form)
 
+# tweets.db memo
+# id, text, date, likes, should_delete, user_id, score,
 
 @app.route("/before_delete/")
 def before_delete():
@@ -128,7 +130,6 @@ def before_delete():
         print(tweet)
         cursor.execute("UPDATE tweets SET should_delete = 0 WHERE id = ?", (tweet[0],))
     db.commit()
-    db.close()
     for tweet in tweets:
         res = ""
         while res not in ["1", "2", "3", "4", "5"]:
@@ -145,9 +146,11 @@ def before_delete():
             print("tweet", tweet)
             print("res", res)
         print(response.choices[0].message.content)
-
         score_list.append(response.choices[0].message.content)
+        cursor.execute("UPDATE tweets SET score = ? WHERE text = ?", (int(res), tweet[0]))
 
+    db.commit()
+    db.close()
     score_list = [int(score) for score in score_list]
     total_score = sum(score_list) / len(score_list)
     total_score = total_score * 200
@@ -164,7 +167,7 @@ def before_delete():
 def after_delete():
     db_after = sqlite3.connect("data/tweets.db")
     cursor = db_after.cursor()
-    cursor.execute("SELECT text, should_delete FROM tweets")
+    cursor.execute("SELECT text, should_delete, score FROM tweets")
     tweets = cursor.fetchall()
     db_after.close()
 
@@ -173,27 +176,9 @@ def after_delete():
         print(tweet)
     for tweet in tweets:
         if tweet[1] == 0:
-            res = ""
-            while res not in ["1", "2", "3", "4", "5"]:
-                msg = [
-                    {
-                        "role": "user",
-                        "content": 'This is about tweets \n"'
-                        + tweet[0]
-                        + '"\n\n これらのツイートの文章はどれくらい適切/ポジティブですか?\n Just awnser "1" to "5". You must not provide any other information. here, "1" means that the tweet is very inappropriate/negative, "2" means that the tweet is inappropriate/negative, "3" means that the tweet is neutral, "4" means that the tweet is appropriate/positive, "5" means that the tweet is very appropriate/positive. You must not provide any other information.',
-                    }
-                ]
-                response = client.chat.completions.create(
-                    model="gpt-4o-mini", messages=msg
-                )
-                res = response.choices[0].message.content
-                print("tweet", tweet)
-                print("res", res)
-            print(response.choices[0].message.content)
+            score_list.append(tweet[2])
 
-            score_list.append(response.choices[0].message.content)
-
-    score_list = [int(score) for score in score_list]
+    #score_list = [int(score) for score in score_list]
     total_score = sum(score_list) / len(score_list)
     total_score = total_score * 200
     # 　切り捨て
@@ -360,7 +345,7 @@ def student_list():
     student_data = [
         {
             "name": "山田太郎",
-            "university": "最高大学",
+            "university": "国際サッカー大学",
             "grade": "学部3",
             "industry": "IT",
             "twitter_account": "@daigaku_saikou",
@@ -370,7 +355,7 @@ def student_list():
             "reason": "",
         },
         {
-            "name": "山田花子",
+            "name": "犬山花子",
             "university": "東京わんこ大好き大学",
             "grade": "修士1",
             "industry": "飲食",
@@ -385,14 +370,14 @@ def student_list():
             "university": "デジタルボリウッド大学",
             "grade": "修士1",
             "industry": "IT",
-            "twitter_account": "@consultant_jiro",
+            "twitter_account": "@IT_teppei",
             "summary": "普段からエンジニアとして研鑽を怠らず、ベストを尽くします。自分の理想に向かって突き進みます。普段はエンジニアとしてインターンをしており、他のエンジニアとのコミュニケーションを大切にしています。",
             "image": "https://as2.ftcdn.net/v2/jpg/07/68/95/75/1000_F_768957539_6BLIzLFo0ytpuYEnT4pQxk95GW0f4Psr.jpg",
             "match": "0%",
             "reason": "",
         },
         {
-            "name": "山田次郎",
+            "name": "浜田孝太郎",
             "university": "イーストキャピタル大学",
             "grade": "学部3",
             "industry": "コンサル",
@@ -402,7 +387,12 @@ def student_list():
             "match": "0%",
             "reason": "",
         },
-    ]
+    ]  # 101,102,103,104
+
+    # DBからユーザー101,102,103,104のツイートを取得し、要約を作成
+    for i, student in enumerate(student_data):
+        student["summary"] = summarize_student(101 + i)
+        print(student["summary"])
 
     for student in student_data:
         match_rate, reason = get_match_rate(student["summary"], student["industry"])
@@ -443,16 +433,16 @@ def sort_scouts(scouts_list):
 
 
 def get_match_rate(summary, industory):
-    our_culture = "私たちの使命新しい当たり前を作り続ける新しい当たり前を作り続けるVision私たちの目指すべき姿世界一の企業へ世界一の企業へValues私たちの共有価値観やりたいことをできているか？やりたいことをできているか？やっていることは興味があることなのか自己学習したくなるほどか仕事が待ち遠しいと感じたことはあるか仕事をしていてワクワクするか仕事を通して自身の成長を感じられるかやるべきことをしているか？やるべきことをしているか？仕事仲間から必要とされているか問題解決となることに取り組んでいるか事業としてスケールする仕事をしているか今できることより一歩上の目標にトライしているか今すべきことを行っているかいい仲間に囲まれているか？いい仲間に囲まれているか？尊敬できる仲間か困っていたら助けたいと思う仲間と仕事をしているか頼りになると思える仲間がいるか一緒に仕事をしていて楽しいと思える仲間か相談できる仲間がいるかたいせつな人をたいせつにできているか？たいせつな人をたいせつにできているか？たいせつな人に喜ばれているかたいせつな人と一緒にいる時間を確保できているかたいせつな人ときちんと会話をしているかたいせつな人が充実した日々をおくれているか笑顔で過ごせているかベストを尽くしているか？ベストを尽くしているか？どんな状況でも最後まで諦めていないか最善の方法をつねに考え抜いているか細部にまでこだわって仕事をできているか上記のことを行動し続けているか未来を見据えて仕事をしているか"
+    our_culture = "私たちの使命「新しい当たり前を作り続ける」新しい当たり前を作り続けるVision私たちの目指すべき姿「世界一の企業へ」Values私たちの共有価値観「やりたいことをできているか？」やっていることは興味があることなのか自己学習したくなるほどか仕事が待ち遠しいと感じたことはあるか仕事をしていてワクワクするか仕事を通して自身の成長を感じられるか「やるべきことをしているか？」仕事仲間から必要とされているか問題解決となることに取り組んでいるか事業としてスケールする仕事をしているか今できることより一歩上の目標にトライしているか今すべきことを行っているか「いい仲間に囲まれているか？」尊敬できる仲間か困っていたら助けたいと思う仲間と仕事をしているか頼りになると思える仲間がいるか一緒に仕事をしていて楽しいと思える仲間か相談できる仲間がいるか「たいせつな人をたいせつにできているか？」たいせつな人に喜ばれているかたいせつな人と一緒にいる時間を確保できているかたいせつな人ときちんと会話をしているかたいせつな人が充実した日々をおくれているか笑顔で過ごせているかベストを尽くしているか？「ベストを尽くしているか？」どんな状況でも最後まで諦めていないか最善の方法をつねに考え抜いているか細部にまでこだわって仕事をできているか上記のことを行動し続けているか未来を見据えて仕事をしているか"
 
     msg = [
         {
             "role": "user",
             "content": ""
             + summary
-            + "\nこの学生が私たちレアゾンの企業文化に合うかどうかを判定してください。以下がレアゾンの企業の文化です。json形式で、match_rate(int)とreason(string)を返してください。match_rateには0から100までの整数が入ります。match_rateが高い場合はその学生が合う理由を、低い場合はその学生が合わない理由を教えてください。業界とスキルと人間性がマッチするなら90%以上にして"
+            + "\nこの学生が私たちレアゾンの企業文化に合うかどうかを判定してください。以下がレアゾンの企業の文化です。json形式で、match_rate(int)とreason(string)を返してください。match_rateには0から100までの整数が入ります。match_rateが高い場合はその学生が合う理由を、低い場合はその学生が合わない理由をレアゾンのカルチャーを引用しつつ教えてください。業界とスキルと人間性がマッチするなら90%以上にして"
             + our_culture
-            + f"私たちの企業名はレアゾンというIT企業です。学生の志望業界は{industory}です。",
+            + f"私たちの企業名はレアゾンという、ゲームや広告、フードテックなど幅広い事業を手がけて海外にも拠点を置くIT企業です。学生の志望業界は{industory}です。",
         }
     ]
 
@@ -465,13 +455,15 @@ def get_match_rate(summary, industory):
     return decoded_json["match_rate"], decoded_json["reason"]
 
 
-def summarize_student():
+def summarize_student(id):
     db = sqlite3.connect("data/tweets.db")
     cursor = db.cursor()
-    cursor.execute("SELECT * FROM tweets")
+    cursor.execute(
+        f"SELECT text FROM tweets WHERE user_id = {id} and should_delete = 0"
+    )
     tweets = cursor.fetchall()
-    # リストを１つの文字列に変換
-    tweets = "\n".join([tweet[1] for tweet in tweets])
+    print(tweets)
+    tweets = "".join([tweet[0] for tweet in tweets])
     db.close()
     msg = [
         {
