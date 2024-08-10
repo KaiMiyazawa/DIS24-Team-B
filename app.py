@@ -320,7 +320,7 @@ def mypage():
     scouts_list = cursor.fetchall()
     scout_db.close()
 
-    print(scouts_list)
+    # print(scouts_list)
 
     # マッチ度と理由のカラムをdbに追加 ======
     scouts_list_copy = scouts_list.copy()
@@ -335,15 +335,16 @@ def mypage():
     cursor.execute("DELETE FROM scouts")
     for scout in scouts_list_copy:
         cursor.execute(
-            "INSERT INTO scouts (id, name, date, industry, details, photo, culture, match_rate, reason) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)", scout
+            "INSERT INTO scouts (id, name, date, industry, details, photo, culture, match_rate, reason) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            scout,
         )
     scout_db.commit()
     scout_db.close()
     # ========================================
 
     print("=== Scouts list ===")
-    print(scouts_list)
-    return render_template("mypage.html", user="user", scouts_list=scouts_list)
+    # print(scouts_list)
+    return render_template("mypage.html", user="user", scouts_list=scouts_list_copy)
 
 
 @app.route("/student_list/")
@@ -387,7 +388,7 @@ def student_list():
             "university": "イーストキャピタル大学",
             "grade": "学部3",
             "industry": "コンサル",
-            "twitter_account": "@consultant_jiro",
+            "twitter_account": "@consultant_kotaro",
             "summary": "性格/n前向きで親しみやすい: 結婚や日常の出来事を喜んで共有し、ポジティブな姿勢を見せています。お祝いに対して感謝の気持ちを示し、結婚祝いのリストも公開するなど、オープンでフレンドリーな一面が見えます。/n社交的: 友人やフォロワーとの交流を大切にし、日常生活や特別な出来事を積極的にシェアしています。/n実直で細かい: 日々の出来事を詳細に報告し、誠実な対応をしている印象があります。/n活動/n学術活動: NAIST渡辺研の博士課程に在籍しており、学位取得に向けて努力しています。言語処理学会の若手支援事業に関与し、関連イベントにも参加しています。/n個人的な生活: 結婚し、家庭を築くことを大切にしており、結婚関連の情報や祝いのリストを公開するなど、プライベートな部分も積極的に共有しています。/n旅行や日常の出来事: 旅行や外出に関する情報も共有し、特に旅行先での経験を詳細に報告しています（例: ホテルチェックインやバス乗り場の情報など）。",
             "image": "https://as2.ftcdn.net/v2/jpg/07/68/95/75/1000_F_768957539_6BLIzLFo0ytpuYEnT4pQxk95GW0f4Psr.jpg",
             "match": "0%",
@@ -409,32 +410,40 @@ def student_list():
 
 
 def sort_scouts(scouts_list):
-    personality = "あなたはIT業界のソフトウェアエンジニアを志している学生です。あなたは仲間と高め合える環境で切磋琢磨し、最高のものを作りたいと考えています。"
+    personality = "私は「IT業界」に進んでソフトウェアエンジニアとして働き様々な事業に取り組みたいと考える学生です。私は性別や年齢に関係なく仲間と高め合える環境で切磋琢磨し、最高のものを作りたいと考えています。"
 
-    for scout in scouts_list:
-        msg = [
-            {
-                "role": "user",
-                "content": ""
-                + "\n私は以下のような特徴を持っています。/n"
-                + personality
-                + "私が次の企業に合うかどうかを判定してください。以下がその企業のカルチャーです。json形式で、match_rate(int)とreason(string)を返してください。match_rateには0から100までの整数が入ります。match_rateが高い場合はその学生が合う理由を、低い場合はその学生が合わない理由を教えてください。"
-                + scout[3]
-                + "この企業の業界は"
-                + scout[2]
-                + "です。",
-            }
-        ]
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=msg,
-            response_format={"type": "json_object"},
+    msg_content = ""
+    for i, scout in enumerate(scouts_list):
+        msg_content += (
+            "\n私は以下のような特徴を持っています。/n"
+            + personality
+            + f"私が次の企業に合うかどうかを判定してください。以下がその企業のカルチャーです。json形式で、match_rate_{i}(int)とreason_{i}(string)を返してください。match_rateには0から100までの整数が入ります。match_rateが高い場合はその学生が合う理由のみを、低い場合はその学生が合わない理由を教えてください。志望業界と人間性が合う場合は90%以上にして、それらが不一致な場合は50%以下にして"
+            + scout[3]
+            + "この企業の業界は"
+            + scout[2]
+            + "です。"
+            + "この企業の名前は"
+            + scout[1]
+            + "です。"
         )
-        decoded_json = json.loads(response.choices[0].message.content)
-        scout[7] = decoded_json["match_rate"]
-        scout[8] = decoded_json["reason"]
-
-    scouts_list = sorted(scouts_list, key=lambda x: x[5], reverse=True)
+    msg_content += "jsonの形式は、{'match_rate_0: int, reason_0: string, match_rate_1: int, reason_1: string,...'}です。マッチ度の理由には、「業界の一致度と、私の性格の一致度の両方から説明して」"
+    msg = [
+        {
+            "role": "user",
+            "content": msg_content,
+        }
+    ]
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=msg,
+        response_format={"type": "json_object"},
+    )
+    print(response.choices[0].message.content)
+    decoded_json = json.loads(response.choices[0].message.content)
+    for i, scout in enumerate(scouts_list):
+        scout[7] = decoded_json[f"match_rate_{i}"]
+        scout[8] = decoded_json[f"reason_{i}"]
+    scouts_list = sorted(scouts_list, key=lambda x: x[7], reverse=True)
     return scouts_list
 
 
@@ -446,7 +455,7 @@ def get_match_rate(summary, industory):
             "role": "user",
             "content": ""
             + summary
-            + "\nこの学生が私たちレアゾンの企業文化に合うかどうかを判定してください。以下がレアゾンの企業の文化です。json形式で、match_rate(int)とreason(string)を返してください。match_rateには0から100までの整数が入ります。match_rateが高い場合はその学生が合う理由を、低い場合はその学生が合わない理由をレアゾンのカルチャーを引用しつつ教えてください。業界とスキルと人間性がマッチするなら90%以上にして"
+            + "\nこの学生が私たちレアゾンの企業文化に合うかどうかを判定してください。以下がレアゾンの企業の文化です。json形式で、match_rate(int)とreason(string)を返してください。match_rateには0から100までの整数が入ります。match_rateが高い場合はその学生が合う理由を、低い場合はその学生が合わない理由をレアゾンのカルチャーを引用しつつ教えてください。業界とスキルと人間性がマッチするならマッチ度を90%以上にして"
             + our_culture
             + f"私たちの企業名はレアゾンという、ゲームや広告、フードテックなど幅広い事業を手がけて海外にも拠点を置くIT企業です。学生の志望業界は{industory}です。",
         }
