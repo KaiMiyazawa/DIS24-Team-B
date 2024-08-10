@@ -119,7 +119,7 @@ def signin():
 def before_delete():
     db_before = sqlite3.connect("data/tweets.db")
     cursor = db_before.cursor()
-    cursor.execute("SELECT text FROM tweets")
+    cursor.execute("SELECT text, user_id FROM tweets")
     tweets = cursor.fetchall()
     db_before.close()
 
@@ -131,6 +131,8 @@ def before_delete():
         cursor.execute("UPDATE tweets SET should_delete = 0 WHERE id = ?", (tweet[0],))
     db.commit()
     for tweet in tweets:
+        if tweet[1] != 101:
+            continue
         res = ""
         while res not in ["1", "2", "3", "4", "5"]:
             msg = [
@@ -167,7 +169,7 @@ def before_delete():
 def after_delete():
     db_after = sqlite3.connect("data/tweets.db")
     cursor = db_after.cursor()
-    cursor.execute("SELECT text, should_delete, score FROM tweets")
+    cursor.execute("SELECT text, should_delete, user_id, score FROM tweets")
     tweets = cursor.fetchall()
     db_after.close()
 
@@ -175,8 +177,10 @@ def after_delete():
     for tweet in tweets:
         print(tweet)
     for tweet in tweets:
+        if tweet[2] != 101:
+            continue
         if tweet[1] == 0:
-            score_list.append(tweet[2])
+            score_list.append(tweet[3])
 
     #score_list = [int(score) for score in score_list]
     total_score = sum(score_list) / len(score_list)
@@ -236,6 +240,8 @@ def listup():
 
     inappropriate_list = []
     for tweet in tweets:
+        if tweet[5] != 101:
+            continue
         if is_inappropriate(tweet):
             inappropriate_list.append(tweet)
 
