@@ -5,28 +5,90 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>学生一覧</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+        }
+        header {
+            background-color: #4a90e2;
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem; /* 全体に余裕を持たせる */
+            width: 100%;
+            max-width: 1200px; /* 最大幅を設定 */
+            margin: 0 auto; /* 中央揃え */
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: #333;
+        }
+        .student-list {
+            width: 100%; /* カード全体の幅を調整 */
+            max-width: 800px; /* 最大幅を設定 */
+            padding: 1rem 2rem; /* 内側に余白を追加 */
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
         .student {
-            border: 1px solid #ccc;
-            margin-bottom: 10px;
-            padding: 10px;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #ccc;
+            padding: 2rem;
         }
         .header {
             font-weight: bold;
-        }
-        .footer {
-            font-size: 0.8em;
-            color: #666;
+            font-size: 1.25rem;
+            color: #4a90e2;
+            margin-bottom: 0.5rem;
         }
         .details {
             margin-top: 5px;
+            color: #555;
         }
         .details span {
             display: block;
+            margin-bottom: 0.5rem;
         }
         .scout-button {
             margin-top: 10px;
+            padding: 0.75rem 1.5rem;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: auto; /* ボタンの幅を自動調整 */
+            display: block; /* ブロック要素として表示 */
+            margin-left: auto; /* ボタンを中央に配置 */
+            margin-right: auto; /* ボタンを中央に配置 */
+        }
+        .scout-button:hover {
+            opacity: 0.8;
+        }
+        .scout-button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
         }
     </style>
+
 </head>
 <body>
     <h1>登録学生一覧</h1>
@@ -40,7 +102,7 @@
                 <span>大学: {{ student['university'] }}</span>
                 <span>学年: {{ student['grade'] }}年</span>
                 <span>志望業界: {{ student['industry'] }}</span>
-                <span>Twitter: <a href="https://twitter.com/{{ student['twitter_account'] }}" target="_blank">{{ student['twitter_account'] }}</a></span>
+                <span>Twitter: <a href="https://x.com/X" target="_blank">{{ student['twitter_account'] }}</a></span>
                 {% if student['summary'] %}
                 <span>マッチ度: {{ student['match'] }}%</span>
                 <span>マッチ度の理由: {{ student['reason'] }}</span>
