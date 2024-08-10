@@ -476,12 +476,12 @@ def get_match_rate(student_data):
     for i, student in enumerate(student_data):
         msg_content += (
             student["summary"]
-            + "\nこの学生が私たちレアゾンの企業文化に合うかどうかを判定してください。以下がレアゾンの企業の文化です。json形式で、match_rate_{i}(int)とreason_{i}(string)を返してください。match_rateには0から100までの整数が入ります。match_rateが高い場合はその学生が合う理由を、低い場合はその学生が合わない理由をレアゾンのカルチャーを引用しつつ教えてください。業界とスキルと人間性がマッチするならマッチ度を90%以上にして"
+            + f"\nこの学生が私たちレアゾンの企業文化に合うかどうかを判定してください。以下がレアゾンの企業の文化です。json形式で、match_rate_{i}(int)とreason_{i}(string)を返してください。match_rateには0から100までの整数が入ります。match_rateが高い場合はその学生が合う理由を、低い場合はその学生が合わない理由をレアゾンのカルチャーを引用しつつ教えてください。業界とスキルと人間性がマッチするならマッチ度を90%以上にして"
             + our_culture
             + f"私たちの企業名はレアゾンという、ゲームや広告、フードテックなど幅広い事業を手がけて海外にも拠点を置くIT企業です。学生の志望業界は{student['industry']}です。"
         )
 
-    msg_content += "jsonの形式は、{'match_rate_0: int, reason_0: string, match_rate_1: int, reason_1: string, match_rate_2: int, reason_2: string, match_rate_3: int, reason_3: string'}です。マッチ度の理由には、「学生の志望業界の一致度と、学生の性格とレアゾンのカルチャーの一致度の両方から説明して」"
+    msg_content += "jsonの形式は、{'match_rate_0: int, reason_0: string, match_rate_1: int, reason_1: string, match_rate_2: int, reason_2: string, match_rate_3: int, reason_3: stringstring'}です。マッチ度の理由には、「学生の志望業界の一致度と、学生の性格とレアゾンのカルチャーの一致度の両方から説明して」"
 
     msg = [
         {
@@ -490,14 +490,29 @@ def get_match_rate(student_data):
         }
     ]
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=msg,
-        response_format={"type": "json_object"},
-    )
-    decoded_json = json.loads(response.choices[0].message.content)
+    while True:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=msg,
+            response_format={"type": "json_object"},
+        )
+        decoded_json = json.loads(response.choices[0].message.content)
+
+        # Check if all match_rate_i and reason_i are present
+        valid_response = True
+        for i in range(len(student_data)):
+            if (
+                f"match_rate_{i}" not in decoded_json
+                or f"reason_{i}" not in decoded_json
+            ):
+                valid_response = False
+                break
+
+        if valid_response:
+            break
     print(decoded_json)
     print(len(student_data))
+
     return decoded_json
 
 
